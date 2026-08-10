@@ -24,19 +24,24 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`\n  🚀 Bank Statement Analyzer running at:`);
-  console.log(`     http://localhost:${PORT}\n`);
-});
+// Only start listening when run directly (not imported by Vercel)
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    console.log(`\n  🚀 Bank Statement Analyzer running at:`);
+    console.log(`     http://localhost:${PORT}\n`);
+  });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.log(`⚠️  Port ${PORT} is in use, trying port ${+PORT + 1}...`);
-    app.listen(+PORT + 1, () => {
-      console.log(`\n  🚀 Bank Statement Analyzer running at:`);
-      console.log(`     http://localhost:${+PORT + 1}\n`);
-    });
-  } else {
-    throw err;
-  }
-});
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`⚠️  Port ${PORT} is in use, trying port ${+PORT + 1}...`);
+      app.listen(+PORT + 1, () => {
+        console.log(`\n  🚀 Bank Statement Analyzer running at:`);
+        console.log(`     http://localhost:${+PORT + 1}\n`);
+      });
+    } else {
+      throw err;
+    }
+  });
+}
+
+module.exports = app;
