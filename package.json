@@ -1,0 +1,24 @@
+{
+  "name": "bank-statement-analyzer",
+  "version": "1.0.0",
+  "description": "Analyze 5 Financial Years of bank statements and generate summary reports",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "server": "node src/server/app.js",
+    "analyze": "node src/index.js --input ./data/input --output ./output",
+    "demo": "node src/generateSampleData.js && node src/index.js --input ./data/input --output ./output"
+  },
+  "keywords": ["bank", "statement", "analyzer", "financial-year", "csv", "excel"],
+  "license": "ISC",
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "csv-parser": "^3.0.0",
+    "fast-csv": "^5.0.1",
+    "commander": "^12.1.0",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}
