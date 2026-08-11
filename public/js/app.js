@@ -713,6 +713,7 @@
     let html = '';
 
     if (d.excel) {
+      const href = d.excelUrl || `/downloads/${encodeURIComponent(d.excel)}`;
       html += `
         <div class="download-card">
           <span class="download-icon">📊</span>
@@ -720,7 +721,7 @@
             <h4>${escapeHtml(d.excel)}</h4>
             <p>Multi-sheet Excel with Dashboard, FY Comparison, Categories, Monthly Trends</p>
           </div>
-          <a class="btn btn-primary btn-sm" href="/downloads/${encodeURIComponent(d.excel)}" download>Download</a>
+          <a class="btn btn-primary btn-sm" href="${href}" download>Download</a>
         </div>
       `;
     }
@@ -734,7 +735,8 @@
         'all_transactions.csv': 'All Transactions (Raw)'
       };
 
-      d.csv.forEach(f => {
+      d.csv.forEach((f, i) => {
+        const href = (d.csvUrls && d.csvUrls[i]) || `/downloads/${encodeURIComponent(f)}`;
         html += `
           <div class="download-card">
             <span class="download-icon">📄</span>
@@ -742,7 +744,7 @@
               <h4>${escapeHtml(f)}</h4>
               <p>${csvLabels[f] || 'CSV Report'}</p>
             </div>
-            <a class="btn btn-outline btn-sm" href="/downloads/${encodeURIComponent(f)}" download>Download</a>
+            <a class="btn btn-outline btn-sm" href="${href}" download>Download</a>
           </div>
         `;
       });

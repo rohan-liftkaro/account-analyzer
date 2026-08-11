@@ -9,17 +9,25 @@
     "analyze-cli": "node src/index.js --input ./data/input --output ./output",
     "demo": "node src/generateSampleData.js && node src/index.js --input ./data/input --output ./output"
   },
-  "keywords": ["bank", "statement", "analyzer", "financial-year", "csv", "excel"],
+  "keywords": [
+    "bank",
+    "statement",
+    "analyzer",
+    "financial-year",
+    "csv",
+    "excel"
+  ],
   "license": "ISC",
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "csv-parser": "^3.0.0",
+    "exceljs": "^4.4.0",
+    "fast-csv": "^5.0.1",
     "next": "^14.2.0",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "exceljs": "^4.4.0",
-    "csv-parser": "^3.0.0",
-    "fast-csv": "^5.0.1",
-    "commander": "^12.1.0",
-    "chalk": "^4.1.2",
-    "cli-table3": "^0.6.5"
+    "react-dom": "^18.3.0"
   }
 }

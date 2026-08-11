@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { existsSync } from 'fs';
-import { UPLOAD_DIR, ALLOWED_EXTENSIONS } from '@/lib/paths';
+import { ALLOWED_EXTENSIONS } from '@/lib/paths';
+import { saveUpload } from '@/lib/storage';
 
 export async function POST(request) {
   try {
-    if (!existsSync(UPLOAD_DIR)) {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-    }
-
     const formData = await request.formData();
     const files = formData.getAll('statements');
 
@@ -20,9 +15,10 @@ export async function POST(request) {
     const uploaded = [];
 
     for (const file of files) {
-      if (!(file instanceof File)) continue;
+      // Duck-type check — `instanceof File` is unreliable in Node.js 18 runtime
+      if (!file || typeof file === 'string' || typeof file.arrayBuffer !== 'function') continue;
 
-      const ext = path.extname(file.name).toLowerCase();
+      const ext = path.extname(file.name || '').toLowerCase();
       if (!ALLOWED_EXTENSIONS.includes(ext)) {
         return NextResponse.json(
           { error: 'Only CSV and Excel files (.csv, .xlsx, .xls) are allowed' },
@@ -36,9 +32,13 @@ export async function POST(request) {
 
       const safeName = file.name.replace(/[^a-zA-Z0-9._\-()[\] ]/g, '_');
       const bytes = await file.arrayBuffer();
-      await writeFile(path.join(UPLOAD_DIR, safeName), Buffer.from(bytes));
+      const saved = await saveUpload(safeName, bytes);
 
-      uploaded.push({ name: file.name, savedAs: safeName, size: file.size });
+      uploaded.push({ name: file.name, savedAs: safeName, size: file.size, ...saved });
+    }
+
+    if (uploaded.length === 0) {
+      return NextResponse.json({ error: 'No valid files received. Check file type.' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, files: uploaded });

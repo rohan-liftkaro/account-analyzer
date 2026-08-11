@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
-import { existsSync, mkdirSync, readdirSync } from 'fs';
-import { UPLOAD_DIR, OUTPUT_DIR, ALLOWED_EXTENSIONS } from '@/lib/paths';
+import { existsSync, mkdirSync } from 'fs';
+import { OUTPUT_DIR, USE_BLOB } from '@/lib/paths';
+import { getUploadPaths, saveReport } from '@/lib/storage';
 import { parseCSV } from '@/src/parser/csvParser';
 import { parseExcel } from '@/src/parser/excelParser';
 import { categorizeAll } from '@/src/analyzer/categorizer';
@@ -11,17 +12,7 @@ import { generateCSVReports } from '@/src/reporter/csvReporter';
 
 export async function POST() {
   try {
-
-    if (!existsSync(UPLOAD_DIR)) {
-      return NextResponse.json(
-        { error: 'No bank statement files found. Upload files first.' },
-        { status: 400 }
-      );
-    }
-
-    const files = readdirSync(UPLOAD_DIR)
-      .filter(f => ALLOWED_EXTENSIONS.includes(path.extname(f).toLowerCase()))
-      .map(f => path.join(UPLOAD_DIR, f));
+    const files = await getUploadPaths();
 
     if (files.length === 0) {
       return NextResponse.json(
@@ -40,19 +31,10 @@ export async function POST() {
           ? await parseCSV(file)
           : await parseExcel(file);
 
-        parseResults.push({
-          file: path.basename(file),
-          transactions: transactions.length,
-          status: 'ok'
-        });
+        parseResults.push({ file: path.basename(file), transactions: transactions.length, status: 'ok' });
         allTransactions = allTransactions.concat(transactions);
       } catch (err) {
-        parseResults.push({
-          file: path.basename(file),
-          transactions: 0,
-          status: 'error',
-          error: err.message
-        });
+        parseResults.push({ file: path.basename(file), transactions: 0, status: 'error', error: err.message });
       }
     }
 
@@ -67,9 +49,16 @@ export async function POST() {
     categorizeAll(allTransactions);
     const summary = buildSummary(allTransactions);
 
-    if (!existsSync(OUTPUT_DIR)) mkdirSync(OUTPUT_DIR, { recursive: true });
-    const excelPath = await generateExcelReport(summary, OUTPUT_DIR);
-    const csvPaths = await generateCSVReports(summary, OUTPUT_DIR);
+    // On Vercel, write reports to /tmp first, then upload to blob storage
+    const localOutputDir = USE_BLOB ? '/tmp/output' : OUTPUT_DIR;
+    if (!existsSync(localOutputDir)) mkdirSync(localOutputDir, { recursive: true });
+
+    const excelPath = await generateExcelReport(summary, localOutputDir);
+    const csvPaths = await generateCSVReports(summary, localOutputDir);
+    const allReportPaths = [excelPath, ...csvPaths];
+
+    // Upload reports to blob (no-op locally — saveReport returns a /downloads/ URL)
+    const savedReports = await Promise.all(allReportPaths.map(p => saveReport(p)));
 
     const serializedTransactions = allTransactions.map((t, idx) => ({
       id: idx + 1,
@@ -82,6 +71,9 @@ export async function POST() {
       type: t.type || (t.debit > 0 ? 'debit' : 'credit'),
       source: t.source || ''
     }));
+
+    const excelReport = savedReports[0];
+    const csvReports = savedReports.slice(1);
 
     const response = {
       success: true,
@@ -97,8 +89,10 @@ export async function POST() {
       monthlyTrend: summary.monthlyTrend,
       fyDetail: {},
       downloads: {
-        excel: path.basename(excelPath),
-        csv: csvPaths.map(p => path.basename(p))
+        excel: excelReport.name,
+        excelUrl: excelReport.url,
+        csv: csvReports.map(r => r.name),
+        csvUrls: csvReports.map(r => r.url),
       }
     };
 

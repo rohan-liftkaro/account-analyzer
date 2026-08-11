@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
-import { existsSync, unlinkSync } from 'fs';
-import { UPLOAD_DIR } from '@/lib/paths';
+import { deleteUpload } from '@/lib/storage';
 
 export async function DELETE(request, { params }) {
   const filename = path.basename(params.filename); // prevent path traversal
-  const filePath = path.join(UPLOAD_DIR, filename);
+  const deleted = await deleteUpload(filename);
 
-  if (!existsSync(filePath)) {
+  if (!deleted) {
     return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
 
-  unlinkSync(filePath);
   return NextResponse.json({ success: true });
 }
