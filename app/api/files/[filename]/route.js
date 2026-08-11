@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { existsSync, unlinkSync } from 'fs';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'data', 'input');
+import { UPLOAD_DIR } from '@/lib/paths';
 
 export async function DELETE(request, { params }) {
   const filename = path.basename(params.filename); // prevent path traversal

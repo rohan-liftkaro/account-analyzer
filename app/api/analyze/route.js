@@ -1,19 +1,16 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { existsSync, mkdirSync, readdirSync } from 'fs';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'data', 'input');
-const OUTPUT_DIR = path.join(process.cwd(), 'output');
-const ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
+import { UPLOAD_DIR, OUTPUT_DIR, ALLOWED_EXTENSIONS } from '@/lib/paths';
+import { parseCSV } from '@/src/parser/csvParser';
+import { parseExcel } from '@/src/parser/excelParser';
+import { categorizeAll } from '@/src/analyzer/categorizer';
+import { buildSummary } from '@/src/analyzer/summaryEngine';
+import { generateExcelReport } from '@/src/reporter/excelReporter';
+import { generateCSVReports } from '@/src/reporter/csvReporter';
 
 export async function POST() {
   try {
-    const { parseCSV } = require('../../../src/parser/csvParser');
-    const { parseExcel } = require('../../../src/parser/excelParser');
-    const { categorizeAll } = require('../../../src/analyzer/categorizer');
-    const { buildSummary } = require('../../../src/analyzer/summaryEngine');
-    const { generateExcelReport } = require('../../../src/reporter/excelReporter');
-    const { generateCSVReports } = require('../../../src/reporter/csvReporter');
 
     if (!existsSync(UPLOAD_DIR)) {
       return NextResponse.json(

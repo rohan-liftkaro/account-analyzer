@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { existsSync, readdirSync, statSync } from 'fs';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'data', 'input');
-const ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
+import { UPLOAD_DIR, ALLOWED_EXTENSIONS } from '@/lib/paths';
 
 export async function GET() {
   if (!existsSync(UPLOAD_DIR)) {

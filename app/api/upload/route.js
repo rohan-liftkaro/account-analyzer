@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'data', 'input');
-const ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
+import { UPLOAD_DIR, ALLOWED_EXTENSIONS } from '@/lib/paths';
 
 export async function POST(request) {
   try {

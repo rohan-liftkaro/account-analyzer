@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { existsSync, readdirSync, statSync } from 'fs';
-
-const OUTPUT_DIR = path.join(process.cwd(), 'output');
+import { OUTPUT_DIR } from '@/lib/paths';
 
 export async function GET() {
   if (!existsSync(OUTPUT_DIR)) {

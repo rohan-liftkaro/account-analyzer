@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { existsSync, readFileSync } from 'fs';
-
-const OUTPUT_DIR = path.join(process.cwd(), 'output');
+import { OUTPUT_DIR } from '@/lib/paths';
 
 const MIME_TYPES = {
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
