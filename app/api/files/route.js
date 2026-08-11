@@ -4,6 +4,11 @@ import { listUploads } from '@/lib/storage';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const files = await listUploads();
-  return NextResponse.json({ files });
+  try {
+    const files = await listUploads();
+    return NextResponse.json({ files });
+  } catch (err) {
+    console.error('listUploads error:', err.message);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
