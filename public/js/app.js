@@ -358,7 +358,21 @@
     const fyFilter = $('#txnFilterFY').value;
 
     txnState.filtered = txns.filter(t => {
-      if (search && !t.description.toLowerCase().includes(search) && !t.category.toLowerCase().includes(search)) return false;
+      if (search) {
+        // Build a single searchable string from all visible fields
+        const haystack = [
+          t.description,
+          t.category,
+          t.source,
+          t.date,
+          t.debit  ? String(t.debit)  : '',
+          t.credit ? String(t.credit) : '',
+        ].join(' ').toLowerCase();
+
+        // Every space-separated word must match somewhere in the haystack
+        const words = search.split(/\s+/).filter(Boolean);
+        if (!words.every(w => haystack.includes(w))) return false;
+      }
       if (typeFilter !== 'all' && t.type !== typeFilter) return false;
       if (catFilter !== 'all' && t.category !== catFilter) return false;
       if (fyFilter !== 'all' && getFYFromDate(t.date) !== fyFilter) return false;
