@@ -8,6 +8,18 @@ const ExcelJS = require('exceljs');
 const { parseDate } = require('../utils/dateUtils');
 const { parseAmount } = require('../utils/formatUtils');
 
+function normalizeHeader(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function inferBankName(filePath) {
+  const baseName = path.basename(filePath, path.extname(filePath));
+  return baseName.replace(/[_\-.]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 // Same column mapping strategy as CSV parser
 const COLUMN_MAPS = {
   date: ['date', 'txn date', 'transaction date', 'value date', 'posting date'],
@@ -15,13 +27,15 @@ const COLUMN_MAPS = {
   debit: ['debit', 'withdrawal', 'debit amount', 'withdrawal amt', 'dr'],
   credit: ['credit', 'deposit', 'credit amount', 'deposit amt', 'cr'],
   balance: ['balance', 'closing balance', 'running balance', 'available balance'],
-  amount: ['amount', 'transaction amount', 'txn amount']
+  amount: ['amount', 'transaction amount', 'txn amount'],
+  chequeNo: ['cheque no', 'cheque number', 'cheque no.', 'chq no', 'chq no.', 'chq. no.', 'check no', 'check number', 'instrument no', 'instrument number']
 };
 
 function findColumnIndex(headerRow, candidates) {
+  const normalizedCandidates = candidates.map(c => normalizeHeader(c));
   for (let i = 0; i < headerRow.length; i++) {
-    const cell = String(headerRow[i] || '').toLowerCase().trim();
-    for (const candidate of candidates) {
+    const cell = normalizeHeader(headerRow[i]);
+    for (const candidate of normalizedCandidates) {
       if (cell === candidate || cell.includes(candidate)) {
         return i;
       }
@@ -40,6 +54,7 @@ async function parseExcel(filePath) {
   await workbook.xlsx.readFile(filePath);
 
   const transactions = [];
+  const bankName = inferBankName(filePath);
 
   workbook.eachSheet((worksheet) => {
     let headerRowIndex = -1;
@@ -66,7 +81,8 @@ async function parseExcel(filePath) {
           debit: findColumnIndex(headerCells, COLUMN_MAPS.debit),
           credit: findColumnIndex(headerCells, COLUMN_MAPS.credit),
           balance: findColumnIndex(headerCells, COLUMN_MAPS.balance),
-          amount: findColumnIndex(headerCells, COLUMN_MAPS.amount)
+          amount: findColumnIndex(headerCells, COLUMN_MAPS.amount),
+          chequeNo: findColumnIndex(headerCells, COLUMN_MAPS.chequeNo)
         };
         break;
       }
@@ -99,10 +115,14 @@ async function parseExcel(filePath) {
       }
 
       const balance = columnMap.balance !== -1 ? parseAmount(cells[columnMap.balance]) : 0;
+      const chequeNo = columnMap.chequeNo !== -1 ? String(cells[columnMap.chequeNo] || '').trim() : '';
 
       transactions.push({
         date,
         description,
+        chequeNo,
+        bankName,
+        sheetName: worksheet.name,
         debit: debit || 0,
         credit: credit || 0,
         balance: balance || 0,

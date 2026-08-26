@@ -362,6 +362,9 @@
         // Build a single searchable string from all visible fields
         const haystack = [
           t.description,
+          t.bankName,
+          t.sheetName,
+          t.chequeNo,
           t.category,
           t.source,
           t.date,
@@ -421,17 +424,22 @@
     // Table body
     const tbody = $('#txnTableBody');
     if (total === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">No transactions match your filters</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="empty-msg">No transactions match your filters</td></tr>';
     } else {
       tbody.innerHTML = pageItems.map(t => {
         const typeBadge = t.type === 'credit'
           ? '<span class="txn-badge credit">Credit</span>'
           : '<span class="txn-badge debit">Debit</span>';
+        const bankLabel = t.sheetName
+          ? `${t.bankName || '-'} (${t.sheetName})`
+          : (t.bankName || '-');
         return `
           <tr>
             <td>${t.id}</td>
             <td class="txn-date">${formatDate(t.date)}</td>
             <td class="txn-desc">${escapeHtml(t.description)}</td>
+            <td>${escapeHtml(bankLabel)}</td>
+            <td>${escapeHtml(t.chequeNo || '-')}</td>
             <td style="color:#dc2626">${t.debit ? formatCurrencyFull(t.debit) : '-'}</td>
             <td style="color:#16a34a">${t.credit ? formatCurrencyFull(t.credit) : '-'}</td>
             <td>${formatCurrencyFull(t.balance)}</td>

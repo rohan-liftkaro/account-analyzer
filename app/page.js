@@ -125,6 +125,8 @@ export default function Home() {
                     <th className="txn-sortable" data-sort="id">#</th>
                     <th className="txn-sortable" data-sort="date">Date ⇅</th>
                     <th>Description</th>
+                    <th className="txn-sortable" data-sort="bankName">Bank Name ⇅</th>
+                    <th className="txn-sortable" data-sort="chequeNo">Cheque No. ⇅</th>
                     <th className="txn-sortable" data-sort="debit">Debit ⇅</th>
                     <th className="txn-sortable" data-sort="credit">Credit ⇅</th>
                     <th className="txn-sortable" data-sort="balance">Balance ⇅</th>

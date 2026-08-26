@@ -85,6 +85,9 @@ async function generateCSVReports(summary, outputDir) {
       allTxns.push({
         'Date': txn.date.toISOString().slice(0, 10),
         'Description': txn.description,
+        'Bank Name': txn.bankName || '',
+        'Sheet Name': txn.sheetName || '',
+        'Cheque No': txn.chequeNo || '',
         'Debit': txn.debit.toFixed(2),
         'Credit': txn.credit.toFixed(2),
         'Balance': txn.balance.toFixed(2),

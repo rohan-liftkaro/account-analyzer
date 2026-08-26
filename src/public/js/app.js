@@ -358,7 +358,14 @@
     const fyFilter = $('#txnFilterFY').value;
 
     txnState.filtered = txns.filter(t => {
-      if (search && !t.description.toLowerCase().includes(search) && !t.category.toLowerCase().includes(search)) return false;
+      if (search) {
+        const inDescription = (t.description || '').toLowerCase().includes(search);
+        const inCategory = (t.category || '').toLowerCase().includes(search);
+        const inCheque = (t.chequeNo || '').toLowerCase().includes(search);
+        const inBank = (t.bankName || '').toLowerCase().includes(search)
+          || (t.sheetName || '').toLowerCase().includes(search);
+        if (!inDescription && !inCategory && !inCheque && !inBank) return false;
+      }
       if (typeFilter !== 'all' && t.type !== typeFilter) return false;
       if (catFilter !== 'all' && t.category !== catFilter) return false;
       if (fyFilter !== 'all' && getFYFromDate(t.date) !== fyFilter) return false;
@@ -407,17 +414,22 @@
     // Table body
     const tbody = $('#txnTableBody');
     if (total === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">No transactions match your filters</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="empty-msg">No transactions match your filters</td></tr>';
     } else {
       tbody.innerHTML = pageItems.map(t => {
         const typeBadge = t.type === 'credit'
           ? '<span class="txn-badge credit">Credit</span>'
           : '<span class="txn-badge debit">Debit</span>';
+        const bankLabel = t.sheetName
+          ? `${t.bankName || '-'} (${t.sheetName})`
+          : (t.bankName || '-');
         return `
           <tr>
             <td>${t.id}</td>
             <td class="txn-date">${formatDate(t.date)}</td>
             <td class="txn-desc">${escapeHtml(t.description)}</td>
+            <td>${escapeHtml(bankLabel)}</td>
+            <td>${escapeHtml(t.chequeNo || '-')}</td>
             <td style="color:#dc2626">${t.debit ? formatCurrencyFull(t.debit) : '-'}</td>
             <td style="color:#16a34a">${t.credit ? formatCurrencyFull(t.credit) : '-'}</td>
             <td>${formatCurrencyFull(t.balance)}</td>
