@@ -5,6 +5,7 @@ import { OUTPUT_DIR, USE_BLOB } from '@/lib/paths';
 import { getUploadPaths, saveReport } from '@/lib/storage';
 import { parseCSV } from '@/src/parser/csvParser';
 import { parseExcel } from '@/src/parser/excelParser';
+import { parsePDF } from '@/src/parser/pdfParser';
 import { categorizeAll } from '@/src/analyzer/categorizer';
 import { buildSummary } from '@/src/analyzer/summaryEngine';
 import { generateExcelReport } from '@/src/reporter/excelReporter';
@@ -29,7 +30,9 @@ export async function POST() {
       try {
         const transactions = ext === '.csv'
           ? await parseCSV(file)
-          : await parseExcel(file);
+          : ext === '.pdf'
+            ? await parsePDF(file)
+            : await parseExcel(file);
 
         parseResults.push({ file: path.basename(file), transactions: transactions.length, status: 'ok' });
         allTransactions = allTransactions.concat(transactions);

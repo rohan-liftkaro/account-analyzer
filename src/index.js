@@ -15,6 +15,7 @@ const Table = require('cli-table3');
 
 const { parseCSV } = require('./parser/csvParser');
 const { parseExcel } = require('./parser/excelParser');
+const { parsePDF } = require('./parser/pdfParser');
 const { categorizeAll } = require('./analyzer/categorizer');
 const { buildSummary } = require('./analyzer/summaryEngine');
 const { generateExcelReport } = require('./reporter/excelReporter');
@@ -45,7 +46,7 @@ async function main() {
   // Validate input directory
   if (!fs.existsSync(inputDir)) {
     console.error(chalk.red(`✗ Input directory not found: ${inputDir}`));
-    console.log(chalk.yellow(`  Create the directory and place your bank statement CSV/Excel files there.`));
+    console.log(chalk.yellow(`  Create the directory and place your bank statement CSV, Excel, or PDF files there.`));
     process.exit(1);
   }
 
@@ -58,12 +59,12 @@ async function main() {
   console.log(chalk.cyan('▸ Step 1: Discovering bank statement files...'));
 
   const files = fs.readdirSync(inputDir)
-    .filter(f => /\.(csv|xlsx|xls)$/i.test(f))
+    .filter(f => /\.(csv|xlsx|xls|pdf)$/i.test(f))
     .map(f => path.join(inputDir, f));
 
   if (files.length === 0) {
-    console.error(chalk.red(`✗ No CSV or Excel files found in: ${inputDir}`));
-    console.log(chalk.yellow(`  Supported formats: .csv, .xlsx, .xls`));
+    console.error(chalk.red(`✗ No CSV, Excel, or PDF files found in: ${inputDir}`));
+    console.log(chalk.yellow(`  Supported formats: .csv, .xlsx, .xls, .pdf`));
     process.exit(1);
   }
 
@@ -81,6 +82,8 @@ async function main() {
       let transactions;
       if (ext === '.csv') {
         transactions = await parseCSV(file);
+      } else if (ext === '.pdf') {
+        transactions = await parsePDF(file);
       } else {
         transactions = await parseExcel(file);
       }

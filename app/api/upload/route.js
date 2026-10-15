@@ -21,7 +21,7 @@ export async function POST(request) {
       const ext = path.extname(file.name || '').toLowerCase();
       if (!ALLOWED_EXTENSIONS.includes(ext)) {
         return NextResponse.json(
-          { error: 'Only CSV and Excel files (.csv, .xlsx, .xls) are allowed' },
+          { error: 'Only CSV, Excel, and PDF files (.csv, .xlsx, .xls, .pdf) are allowed' },
           { status: 400 }
         );
       }

@@ -4,7 +4,8 @@ Analyze **all Financial Years** of bank statements and generate comprehensive su
 
 ## Features
 
-- **Multi-format Input**: Reads CSV and Excel (.xlsx/.xls) bank statements
+- **Multi-format Input**: Reads CSV, Excel (.xlsx/.xls), and text-based PDF bank statements
+- **PDF Extraction**: Sends dated transactions from selectable-text PDFs through the same analysis and reporting flow
 - **Smart Column Detection**: Auto-detects column headers regardless of bank format
 - **Auto-Categorization**: 19+ categories (Salary, EMI, Rent, Food, Shopping, UPI, etc.)
 - **Multi-FY Analysis**: Full financial year breakdown (April–March) for all FYs in your data
@@ -42,7 +43,9 @@ node src/index.js -i ./data/input -o ./output --format both
 
 ## Input Format
 
-Place your bank statement files (`.csv`, `.xlsx`, `.xls`) in the `data/input/` folder.
+Place your bank statement files (`.csv`, `.xlsx`, `.xls`, `.pdf`) in the `data/input/` folder.
+
+PDF statements must contain selectable text; scanned/image-only PDFs require OCR and are not supported.
 
 The parser auto-detects these column names:
 
@@ -85,7 +88,8 @@ Summary/
 │   ├── generateSampleData.js     # Sample data generator
 │   ├── parser/
 │   │   ├── csvParser.js          # CSV file reader
-│   │   └── excelParser.js        # Excel file reader
+│   │   ├── excelParser.js        # Excel file reader
+│   │   └── pdfParser.js          # Text-based PDF file reader
 │   ├── analyzer/
 │   │   ├── categorizer.js        # Transaction categorizer
 │   │   ├── fyAnalyzer.js         # FY aggregation engine

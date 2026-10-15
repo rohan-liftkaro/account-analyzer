@@ -163,14 +163,14 @@
 
     for (const file of files) {
       const ext = file.name.split('.').pop().toLowerCase();
-      if (['csv', 'xlsx', 'xls'].includes(ext)) {
+      if (['csv', 'xlsx', 'xls', 'pdf'].includes(ext)) {
         formData.append('statements', file);
         validCount++;
       }
     }
 
     if (validCount === 0) {
-      showToast('Only CSV and Excel files are supported', 'error');
+      showToast('Only CSV, Excel, and PDF files are supported', 'error');
       return;
     }
 
@@ -208,7 +208,7 @@
 
       fileList.innerHTML = data.files.map(f => {
         const ext = f.name.split('.').pop().toLowerCase();
-        const icon = ext === 'csv' ? '📄' : '📊';
+        const icon = ext === 'csv' || ext === 'pdf' ? '📄' : '📊';
         return `
           <div class="file-item">
             <div class="file-item-info">

@@ -53,8 +53,8 @@ export default function Home() {
             <div className="upload-icon">📂</div>
             <h3>Drag &amp; Drop Bank Statements Here</h3>
             <p>or click to browse files</p>
-            <p className="upload-hint">Supports CSV, XLSX, XLS — Max 50MB per file</p>
-            <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls" hidden />
+            <p className="upload-hint">Supports CSV, XLSX, XLS, PDF — Max 50MB per file</p>
+            <input type="file" id="fileInput" multiple accept=".csv,.xlsx,.xls,.pdf" hidden />
           </div>
 
           <div className="file-list-section">

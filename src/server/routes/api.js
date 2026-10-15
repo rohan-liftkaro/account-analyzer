@@ -9,6 +9,7 @@ const fs = require('fs');
 
 const { parseCSV } = require('../../parser/csvParser');
 const { parseExcel } = require('../../parser/excelParser');
+const { parsePDF } = require('../../parser/pdfParser');
 const { categorizeAll } = require('../../analyzer/categorizer');
 const { buildSummary } = require('../../analyzer/summaryEngine');
 const { generateExcelReport } = require('../../reporter/excelReporter');
@@ -24,7 +25,7 @@ const OUTPUT_DIR = path.join(__dirname, '..', '..', '..', 'output');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
-// Multer config — only allow csv/excel files
+// Multer config — allow CSV, Excel, and PDF statements
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
   filename: (req, file, cb) => {
@@ -34,7 +35,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
+const ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls', '.pdf'];
 
 const upload = multer({
   storage,
@@ -44,7 +45,7 @@ const upload = multer({
     if (ALLOWED_EXTENSIONS.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Only CSV and Excel files (.csv, .xlsx, .xls) are allowed'));
+      cb(new Error('Only CSV, Excel, and PDF files (.csv, .xlsx, .xls, .pdf) are allowed'));
     }
   }
 });
@@ -117,7 +118,9 @@ router.post('/analyze', async (req, res) => {
       try {
         const transactions = ext === '.csv'
           ? await parseCSV(file)
-          : await parseExcel(file);
+          : ext === '.pdf'
+            ? await parsePDF(file)
+            : await parseExcel(file);
 
         parseResults.push({
           file: path.basename(file),
